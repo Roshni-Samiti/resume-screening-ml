@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Screening</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #121212;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #4caf50;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #ccc;
+        }
+
+        ul {
+            text-align: left;
+            color: #ccc;
+        }
+
+        .upload-box {
+            margin: 20px 0;
+            padding: 20px;
+            background: #222;
+            border-radius: 5px;
+            border: 2px dashed #4caf50;
+        }
+
+        input[type="file"] {
+            display: block;
+            margin: 10px auto;
+            color: #fff;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background: #4caf50;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .message {
+            margin-top: 15px;
+            color: red;
+        }
+
+        #result {
+            margin-top: 20px;
+            background: #222;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>AI Resume Screening</h1>
+        <p>Upload your resume (PDF or TXT) to get:</p>
+        <ul>
+            <li>Resume Category Prediction</li>
+            <li>Job Recommendations</li>
+            <li>Extracted Personal Information</li>
+        </ul>
+
+        <form id="resumeForm" enctype="multipart/form-data">
+            <div class="upload-box">
+                <input type="file" id="resume" name="resume" accept=".pdf, .txt" required>
+            </div>
+            <button type="submit">Analyze Resume</button>
+        </form>
+
+        <div class="message" id="responseMessage"></div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('resumeForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+
+            fetch('/pred', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('responseMessage').textContent = '';
+                let resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = '';
+                if (data.message) {
+                    document.getElementById('responseMessage').textContent = data.message;
+                }
+                if (data.predicted_category) {
+                    resultDiv.innerHTML = `
+                        <h3>Category: ${data.predicted_category}</h3>
+                        <h3>Recommended Job: ${data.recommended_job}</h3>
+                        <p><strong>Name:</strong> ${data.name}</p>
+                        <p><strong>Phone:</strong> ${data.phone}</p>
+                        <p><strong>Email:</strong> ${data.email}</p>
+                    `;
+                }
+            })
+            .catch(error => {
+                document.getElementById('responseMessage').textContent = 'Error: ' + error.message;
+            });
+        });
+    </script>
+</body>
+</html>
